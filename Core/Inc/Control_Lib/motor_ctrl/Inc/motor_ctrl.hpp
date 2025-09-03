@@ -20,8 +20,8 @@ public:
     ~MotorController() = default;
     
     void init(int en_ctrl,int dir_ctrl);                        // Initialize the basic parameter
-    void setSpeed(double speed);        // Set motor speed in RPS
-    double getSpeed();                  // Return the current speed (Need to enable setSpeed())
+    void setSpeed(float speed);        // Set motor speed in RPS
+    float getSpeed();                  // Return the current speed (Need to enable setSpeed())
 
 
 private:
@@ -31,29 +31,29 @@ private:
     GPIO_TypeDef* _dirGPIO;
     uint16_t _dirPin;
 
-    double _kp;
-    double _ki;
-    double _kd;
+    float _kp;
+    float _ki;
+    float _kd;
 
     bool _isCountingDown = false;
     bool _isRotating = false;
-    uint32_t _last_cnt = 0;
-    uint32_t _pwmValue = 0;
-    double _pidOutput = 0.0;
-    double _currentSpeed = 0;
-    double _targetSpeed = 0;
-    double _error = 0;
-    double _lastError = 0;
-    double _integral = 0;
-    double _dt = 100;
-    uint32_t _current_cnt = 0;
+    uint16_t _last_cnt = 0;
+    int16_t cnt = 0;
+    uint16_t _pwmValue = 0;
+    float _pidOutput = 0.0;
+    float _currentSpeed = 0;
+    float _targetSpeed = 0;
+    float _error = 0;
+    float _lastError = 0;
+    float _integral = 0;
+    float _dt = 100;
+    uint16_t _current_cnt = 0;
     int _en_ctrl = 0;
     int _dir_ctrl = 0;
     //int _doupdatespeed = 0;
 
-    double ComputePID();                // PID controller
-    double updateSpeed();               // Update the motor current speed
-    double updateSpeed2(int sign);
+    float ComputePID();                // PID controller
+    float updateSpeed();               // Update the motor current speed
 };
 
 #ifdef __cplusplus

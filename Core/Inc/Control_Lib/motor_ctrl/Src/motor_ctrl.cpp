@@ -1,5 +1,5 @@
 #include "motor_ctrl.hpp"
-
+int times = 0;
 uint32_t current_cnt;
 void MotorController::init(int en_ctrl,int dir_ctrl) {
     HAL_TIM_Encoder_Start(_enc, TIM_CHANNEL_ALL);
@@ -8,18 +8,21 @@ void MotorController::init(int en_ctrl,int dir_ctrl) {
     _en_ctrl = en_ctrl;
 }
 
-void MotorController::setSpeed(double speed) {
+void MotorController::setSpeed(float speed) {
+
     _targetSpeed = speed;
+//    times++;
     ComputePID();
 
-    if (_pidOutput > 80.0) _pidOutput = 80.0;
-    if (_pidOutput < -80.0) _pidOutput = -80.0;
-    if (_dir_ctrl == 1){
-    	HAL_GPIO_WritePin(_dirGPIO, _dirPin, _pidOutput >= 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    }else{
-    	HAL_GPIO_WritePin(_dirGPIO, _dirPin, _pidOutput >= 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
-    }
-    _pwmValue = (uint32_t)(fabs(_pidOutput) * PWM_ARR / 100.0);
+//    if (_pidOutput > 80.0) _pidOutput = 80.0;
+//    if (_pidOutput < -80.0) _pidOutput = -80.0;
+//    if (_dir_ctrl == 1){
+    HAL_GPIO_WritePin(_dirGPIO, _dirPin, _pidOutput >= 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
+//    }else{
+//    	HAL_GPIO_WritePin(_dirGPIO, _dirPin, _pidOutput >= 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+//    }
+    _pwmValue = (uint16_t)(fabs(_pidOutput) * PWM_ARR );///  10.0);
+    if (_pwmValue < 10) _pwmValue = 0;
     __HAL_TIM_SET_COMPARE(_pwm, _channel, _pwmValue);
 //    _targetSpeed = speed;
 //    ComputePID();
@@ -29,27 +32,31 @@ void MotorController::setSpeed(double speed) {
 //	else HAL_GPIO_WritePin(_dirGPIO, _dirPin, GPIO_PIN_RESET);
 //
 //	__HAL_TIM_SET_COMPARE(_pwm, _channel, (uint16_t)_pwmValue);
+
 }
 
-double MotorController::getSpeed() {
+float MotorController::getSpeed() {
 //	updateSpeed();
     return _currentSpeed;
 }
 
-double MotorController::ComputePID() {
+float MotorController::ComputePID() {
     updateSpeed();
     _error = _targetSpeed - _currentSpeed;
 
+    _integral += _error * (DT / 1000.0);
     if(_integral >= INTEGRAL_LIMIT) _integral = INTEGRAL_LIMIT;
     else if(_integral <= -INTEGRAL_LIMIT) _integral = -INTEGRAL_LIMIT;
-    else _integral += _error * (DT / 1000.0);
 
-    double derivative = (_error - _lastError) / (DT / 1000.0);
 
-    _pidOutput = (_kp * _error) + (_ki * _integral) + (_kd * derivative);
+    float derivative = (_error - _lastError) / (DT / 1000.0);
+
+    _pidOutput = (_kp * _error) + (_ki * _integral); //+ (_kd * derivative);
 
     // Update last error
     _lastError = _error;
+    if(_pidOutput > 1) _pidOutput = 1;
+    else if (_pidOutput < -1) _pidOutput = -1;
     return _pidOutput;
 //	float bound = 1.0f / _ki;
 //	_error = _targetSpeed - _currentSpeed;
@@ -69,18 +76,21 @@ double MotorController::ComputePID() {
 //    return _pidOutput;
 }
 
-double MotorController::updateSpeed() {
-    if(_last_cnt == __HAL_TIM_GET_COUNTER(_enc))
-        _isCountingDown = false;
-    else
-        _isCountingDown = __HAL_TIM_IS_TIM_COUNTING_DOWN(_enc);
+float MotorController::updateSpeed() {
+//    if(_last_cnt == __HAL_TIM_GET_COUNTER(_enc))
+//        _isCountingDown = false;
+//    else
+//        _isCountingDown = __HAL_TIM_IS_TIM_COUNTING_DOWN(_enc);
+//
+//    if(_isCountingDown)
+//        _currentSpeed = -((_enc->Instance->ARR - __HAL_TIM_GET_COUNTER(_enc)) / ENCODER_RESOLUTION / REDUCTION_RATIO / 4) / (DT / 1000.0); // RPS
+//    else
+//        _currentSpeed = (__HAL_TIM_GET_COUNTER(_enc) / ENCODER_RESOLUTION / REDUCTION_RATIO / 4) / (DT / 1000.0); // RPS
+//
+//    _last_cnt = __HAL_TIM_GET_COUNTER(_enc);
 
-    if(_isCountingDown)
-        _currentSpeed = -((_enc->Instance->ARR - __HAL_TIM_GET_COUNTER(_enc)) / ENCODER_RESOLUTION / REDUCTION_RATIO / 4) / (DT / 1000.0); // RPS
-    else
-        _currentSpeed = (__HAL_TIM_GET_COUNTER(_enc) / ENCODER_RESOLUTION / REDUCTION_RATIO / 4) / (DT / 1000.0); // RPS
-
-    _last_cnt = __HAL_TIM_GET_COUNTER(_enc);
+	cnt = __HAL_TIM_GetCounter(_enc);
+	_currentSpeed = (cnt/ENCODER_RESOLUTION / REDUCTION_RATIO / 4) / (DT / 1000.0);
     __HAL_TIM_SET_COUNTER(_enc, 0);
 //    _currentSpeed *= _en_ctrl;
     return _currentSpeed;

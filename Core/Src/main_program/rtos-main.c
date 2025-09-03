@@ -9,6 +9,7 @@
 #include "uros_init.h"
 #include "motor_config.h"
 #include "Pinpoint.hpp"
+#include "chassis_monitor.hpp"
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
@@ -35,7 +36,7 @@ void motorTimerCallback(TimerHandle_t xTimer);
 
 void StartDefaultTask(void *argument)
 {
-    xTimer = xTimerCreate("MotorTimer", pdMS_TO_TICKS(100), pdTRUE, (void *)0, motorTimerCallback);
+    xTimer = xTimerCreate("MotorTimer", pdMS_TO_TICKS(1), pdTRUE, (void *)0, motorTimerCallback);
     xTimerStart(xTimer, 0);
 //    HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
     motor_init();
@@ -59,9 +60,14 @@ void motorTimerCallback(TimerHandle_t xTimer)
 
 //	motor_monitor();
 //	i2c_req = 1;
+	chassis_monitor();
 
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_4, CNT);
+//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+//	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_4, CNT);
+//	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, CNT);
 //	pinpoint.taskloop();
 //	CNT = __HAL_TIM_GET_COUNTER(&htim1);
 //    turn = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1);
