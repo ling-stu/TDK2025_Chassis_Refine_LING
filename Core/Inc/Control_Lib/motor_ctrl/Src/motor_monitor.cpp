@@ -23,10 +23,10 @@ extern TIM_HandleTypeDef htim8;
 //    BR :B14   PC8      PA6/PA7
 //    BL :B15   PC9      PB6/PB7
 //
-MotorController Motor_FR(&htim1, &htim8, TIM_CHANNEL_1, GPIOB, GPIO_PIN_12, 4,  90, 0);
-MotorController Motor_FL(&htim2, &htim8, TIM_CHANNEL_2, GPIOA, GPIO_PIN_12, 5,  90, 0);
-MotorController Motor_BR(&htim3, &htim8, TIM_CHANNEL_3, GPIOB, GPIO_PIN_14, 5, 100, 0);
-MotorController Motor_BL(&htim4, &htim8, TIM_CHANNEL_4, GPIOB, GPIO_PIN_15, 5, 250, 0);
+MotorController Motor_FR(&htim1, &htim8, TIM_CHANNEL_1, GPIOB, GPIO_PIN_12, 4, 200, 0);
+MotorController Motor_FL(&htim2, &htim8, TIM_CHANNEL_2, GPIOA, GPIO_PIN_12, 5, 200, 0);
+MotorController Motor_BR(&htim3, &htim8, TIM_CHANNEL_3, GPIOB, GPIO_PIN_14, 5, 200, 0);
+MotorController Motor_BL(&htim4, &htim8, TIM_CHANNEL_4, GPIOB, GPIO_PIN_15, 5, 200, 0);
 
 float VgoalFR = 0.0;
 float VgoalFL = 0.0;

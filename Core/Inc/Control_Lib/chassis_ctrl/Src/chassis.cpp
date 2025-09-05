@@ -1,15 +1,9 @@
 #include "chassis.hpp"
 #include "motor_config.h"
-float FR,FL,BR,BL;
-int loc_times;
 float Vx_global,Vy_global,dt;
 void Chassis::setSpeed(float Vx_goal, float Vy_goal, float W_goal){
     _Vx_goal = Vx_goal; _Vy_goal = Vy_goal; _W_goal = W_goal;
     Mecan_InverseKinematics();
-    FR = _V_FR_goal;
-    FL = _V_FL_goal;
-    BR = _V_BR_goal;
-    BL = _V_BL_goal;
     _motorFR->setSpeed(_V_FR_goal);
     _motorFL->setSpeed(_V_FL_goal);
     _motorBR->setSpeed(_V_BR_goal);
@@ -24,7 +18,6 @@ void Chassis::getLocation(){
     Vy_global = _Vx_now * sin(theta) + _Vy_now * cos(theta);   // cm/s
     x += (Vx_global * (dt/1000));                                        // cm
     y += (Vy_global * (dt/1000));										// cm
-    loc_times++;
 }
 
 void Chassis::Mecan_ForwardKinematics(){
